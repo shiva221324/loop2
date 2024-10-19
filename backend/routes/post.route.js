@@ -8,6 +8,7 @@ import {
   createComment,
   likePost,
   editPost,
+  deleteComment,
 } from "../controllers/post.controller.js";
 import multer from "multer";
 import path from "path";
@@ -52,6 +53,8 @@ router.post(
 router.delete("/delete/:id", protectRoute, deletePost);
 router.get("/:id", protectRoute, getPostById);
 router.post("/:id/comment", protectRoute, createComment);
+router.post("/deleteComment", protectRoute, deleteComment);
+
 router.post("/:id/like", protectRoute, likePost);
 
 export default router;

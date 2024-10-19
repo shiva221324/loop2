@@ -283,3 +283,24 @@ export const likePost = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.body;
+
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { comments: { _id: commentId } } },
+      { new: true }
+    ).populate("author", "name email username headline profilePicture");
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in deleteComment controller:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

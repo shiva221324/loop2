@@ -8,18 +8,18 @@ import RecommendedUser from "../components/RecommendedUser";
 import { useState } from "react";
 
 const HomePage = () => {
-	const [YourPost, setYourPost] = useState(false);
-	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const [YourPost, setYourPost] = useState(false);
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
-	const { data: recommendedUsers } = useQuery({
-		queryKey: ["recommendedUsers"],
-		queryFn: async () => {
-			const res = await axiosInstance.get("/users/suggestions");
-			return res.data;
-		},
-	});
+  const { data: recommendedUsers } = useQuery({
+    queryKey: ["recommendedUsers"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/users/suggestions");
+      return res.data;
+    },
+  });
 
-	const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers = recommendedUsers?.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -46,16 +46,16 @@ const HomePage = () => {
     },
   });
 
-	return (
-		<div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
-			<div className='hidden lg:block lg:col-span-1'>
-				<Sidebar user={authUser} />
-			</div>
+  return (
+    <div className="grid grid-cols-1 dark:bg-black lg:grid-cols-4 gap-6">
+      <div className="hidden lg:block lg:col-span-1">
+        <Sidebar user={authUser} />
+      </div>
 
-			<div className='col-span-1 lg:col-span-2 order-first lg:order-none'>
-				<PostCreation user={authUser} />
+      <div className="col-span-1 lg:col-span-2 order-first lg:order-none">
+        <PostCreation user={authUser} />
 
-				<div className="flex w-full justify-center gap-4 my-4">
+        <div className="flex w-full justify-center gap-4 my-4">
           <button
             onClick={() => setYourPost(false)}
             className={`${
@@ -78,7 +78,7 @@ const HomePage = () => {
           </button>
         </div>
 
-		{YourPost ? (
+        {YourPost ? (
           posts2?.length > 0 ? (
             posts2?.map((post) => <Post key={post._id} post={post} />)
           ) : (

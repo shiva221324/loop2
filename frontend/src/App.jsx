@@ -19,6 +19,8 @@ import NotFoundPage from "./NotFoundPage";
 import ForgotPasswordForm from "./components/auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/auth/ResetPasswordForm";
 import EditPost from "./components/EditPost";
+import { useContext } from "react";
+import { AppContext } from "./AppContext.jsx";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -38,8 +40,10 @@ function App() {
   console.log("authUser", authUser);
   if (isLoading) return null; // Show nothing or a loader while checking authentication
   const role = localStorage.getItem("userRole");
+  const { isDark, setIsDark } = useContext(AppContext);
+
   return (
-    <>
+    <div className={`${isDark ? "dark" : ""}`}>
       <Routes>
         <Route path="*" element={<NotFoundPage />} />
         <Route
@@ -155,7 +159,7 @@ function App() {
         )}
       </Routes>
       <Toaster />
-    </>
+    </div>
   );
 }
 
