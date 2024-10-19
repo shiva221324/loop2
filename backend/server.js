@@ -21,7 +21,7 @@ const __dirname = path.resolve();
 if (process.env.NODE_ENV !== "production") {
 	app.use(
 		cors({
-			origin: "http://localhost:5173",
+			origin: "https://loop-frontend-steel.vercel.app/",
 			credentials: true,
 		})
 	);
@@ -29,6 +29,10 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(express.json({ limit: "5mb" })); // parse JSON request bodies
 app.use(cookieParser());
+
+app.get('/',(req, res) => {
+	res.send("hii");
+})
 
 app.use("/api/v1/auth", authRoutes);
 import adminRoutes from "./routes/admin.route.js";
