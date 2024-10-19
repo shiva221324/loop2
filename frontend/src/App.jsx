@@ -18,6 +18,7 @@ import ViewUserPosts from "./components/admin/ViewUserPosts";
 import NotFoundPage from "./NotFoundPage";
 import ForgotPasswordForm from "./components/auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/auth/ResetPasswordForm";
+import EditPost from "./components/EditPost";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -40,7 +41,7 @@ function App() {
   return (
     <>
       <Routes>
-      <Route path="*" element={<NotFoundPage/>}/>
+        <Route path="*" element={<NotFoundPage />} />
         <Route
           path="/"
           element={
@@ -57,7 +58,7 @@ function App() {
             )
           }
         />
-
+        <Route path="edit" element={<EditPost />} />
         <Route
           path="/signup"
           element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
@@ -90,10 +91,18 @@ function App() {
         )}
         {role === "user" && (
           <>
-          <Route
-          path="/messages"
-          element={authUser ? <Layout><Messages /></Layout> : <Landing />}
-        />
+            <Route
+              path="/messages"
+              element={
+                authUser ? (
+                  <Layout>
+                    <Messages />
+                  </Layout>
+                ) : (
+                  <Landing />
+                )
+              }
+            />
             <Route
               path="/notifications"
               element={

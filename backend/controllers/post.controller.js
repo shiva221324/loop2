@@ -3,7 +3,7 @@ import Post from "../models/post.model.js";
 import Notification from "../models/notification.model.js";
 import { sendCommentNotificationEmail } from "../emails/emailHandlers.js";
 import path from "path";
-import multer from 'multer'
+import multer from "multer";
 
 export const getFeedPosts = async (req, res) => {
   try {
@@ -24,7 +24,7 @@ export const getFeedPosts = async (req, res) => {
 // Set up multer storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Specify the directory to save files
+    cb(null, "uploads/"); // Specify the directory to save files
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -36,8 +36,8 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg' && ext !== '.mp4') {
-      return cb(new Error('Only images and videos are allowed'));
+    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg" && ext !== ".mp4") {
+      return cb(new Error("Only images and videos are allowed"));
     }
     cb(null, true);
   },
@@ -57,65 +57,110 @@ async function uploadFiletoCloudinary(file, folder, quality) {
 export const createPost = async (req, res) => {
   try {
     const { content } = req.body;
-console.log("content: " , content)
+    console.log("content: ", content);
     let newPost = { author: req.user._id, content };
-    let check=false;
-console.log("req",req.files.video)
+    let check = false;
+    console.log("req", req.files.video);
     let response;
     let post;
     // Add image URL to post if an image is uploaded
     if (req.files.image) {
       check = true;
-       response = await uploadFiletoCloudinary(req.files.image[0], "normalpractice");
-       post = new Post({
-         ...newPost,
-        contentimg:response.secure_url
-        });
+      response = await uploadFiletoCloudinary(
+        req.files.image[0],
+        "normalpractice"
+      );
+      post = new Post({
+        ...newPost,
+        contentimg: response.secure_url,
+      });
       // newPost.contentimg = `/uploads/${req.files.image[0].filename}`;
-      
     }
 
     // Add video URL to post if a video is uploaded
-      if (req.files.video) {
-        check = true;
+    if (req.files.video) {
+      check = true;
 
-        response = await uploadFiletoCloudinary(req.files.video[0], "normalpractice");
-        post = new Post({
-        ...newPost,
-        contentvideo:response.secure_url
-        });
-      // newPost.contentvideo = `/uploads/${req.files.video[0].filename}`;
-    }
-    if(!check)
-    {
+      response = await uploadFiletoCloudinary(
+        req.files.video[0],
+        "normalpractice"
+      );
       post = new Post({
         ...newPost,
-        });
+        contentvideo: response.secure_url,
+      });
+      // newPost.contentvideo = `/uploads/${req.files.video[0].filename}`;
     }
-console.log("response: " ,response);
+    if (!check) {
+      post = new Post({
+        ...newPost,
+      });
+    }
+    console.log("response: ", response);
     // Create and save the post
 
     await post.save();
 
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error in createPost controller:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error in createPost controller:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
+export const editPost = async (req, res) => {
+  try {
+    const { id } = req.params; // assuming the post ID is passed in the URL
+    const { content } = req.body;
+    console.log("id ", id, content);
+    // Find the post by ID
+    let post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
+    // Update the post content
+    if (content) {
+      post.content = content;
+    }
 
+    let check = false;
+    let response;
 
+    if (req.files.image) {
+      check = true;
+      response = await uploadFiletoCloudinary(
+        req.files.image[0],
+        "normalpractice"
+      );
+      post.contentimg = response.secure_url;
+    }
 
+    // Update video URL if a new video is uploaded
+    if (req.files.video) {
+      check = true;
+      response = await uploadFiletoCloudinary(
+        req.files.video[0],
+        "normalpractice"
+      );
+      post.contentvideo = response.secure_url;
+    }
 
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in editPost controller:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 export const deletePost = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const id = req.params.id;
     const userId = req.user._id;
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -135,7 +180,7 @@ export const deletePost = async (req, res) => {
       );
     }
 
-    await Post.findByIdAndDelete(postId);
+    await Post.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
@@ -146,8 +191,8 @@ export const deletePost = async (req, res) => {
 
 export const getPostById = async (req, res) => {
   try {
-    const postId = req.params.id;
-    const post = await Post.findById(postId)
+    const id = req.params.id;
+    const post = await Post.findById(id)
       .populate("author", "name username profilePicture headline")
       .populate("comments.user", "name profilePicture username headline");
 
@@ -160,11 +205,11 @@ export const getPostById = async (req, res) => {
 
 export const createComment = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const id = req.params.id;
     const { content } = req.body;
 
     const post = await Post.findByIdAndUpdate(
-      postId,
+      id,
       {
         $push: { comments: { user: req.user._id, content } },
       },
@@ -177,13 +222,13 @@ export const createComment = async (req, res) => {
         recipient: post.author,
         type: "comment",
         relatedUser: req.user._id,
-        relatedPost: postId,
+        relatedPost: id,
       });
 
       await newNotification.save();
 
       try {
-        const postUrl = process.env.CLIENT_URL + "/post/" + postId;
+        const postUrl = process.env.CLIENT_URL + "/post/" + id;
         await sendCommentNotificationEmail(
           post.author.email,
           post.author.name,
@@ -205,8 +250,8 @@ export const createComment = async (req, res) => {
 
 export const likePost = async (req, res) => {
   try {
-    const postId = req.params.id;
-    const post = await Post.findById(postId);
+    const id = req.params.id;
+    const post = await Post.findById(id);
     const userId = req.user._id;
 
     if (post.likes.includes(userId)) {
@@ -223,7 +268,7 @@ export const likePost = async (req, res) => {
           recipient: post.author,
           type: "like",
           relatedUser: userId,
-          relatedPost: postId,
+          relatedPost: id,
         });
 
         await newNotification.save();
